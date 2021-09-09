@@ -42,6 +42,11 @@ contract ComicDAO is DaoManager {
     
 
     /* @notice This function allows the governor to add new writer to the DAO. */
+    function addConcept(string memory _newConcept) external onlyGovernor {
+        concepts.push(_newConcept));
+    }
+
+    /* @notice This function allows the governor to add new writer to the DAO. */
     function addConcept(bytes calldata _param) external onlyGovernor {
         concepts.push(string(abi.encodePacked(_param)));
     }
@@ -56,9 +61,7 @@ contract ComicDAO is DaoManager {
         artists.push(bytesToAddress(_param));
     }
 
-
-
-    function setCoinAddress(address _coinAddress) external { //TODO: onlyOwner?
+    function setCoinAddress(address _coinAddress) external { // TODO: onlyOwner?
         coin = IERC20Extended(_coinAddress);
     }
 
@@ -84,13 +87,20 @@ contract ComicDAO is DaoManager {
         } 
     }
 
+    // ========== RESTRICTED ==========
+
+    /**
+     * @notice Fallback function
+     */
     fallback() external payable {
         revert("Use the contribute() function");
     }
+
+    /* ========== MODIFIERS ========== */
 
     modifier onlyGovernor() {
         require(msg.sender == address(governor), "Only the governor may execute this function.");
         _;
     }
-    
+
 }

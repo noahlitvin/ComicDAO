@@ -1,22 +1,33 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-/*
-The intention of this contract is to abstract management of a DAO by allowing an inheriting contract to specify functions that can be proposed and executed by a contract following OpenZeppelin's Governor API with as little code as possible.
-Ideally, just a modifier in the inhereting contract would allow this, but due to constraints with Solidity, there's a little more to it.
-Many limitations exist with this current implementation:
-- passing msg.value
-- parameter types
-- number of params
-Further notes:
-- This does not take into account the description field
-- This does not take into account gas efficiency.
-*/
-
-
 // Libraries
 import "@openzeppelin/contracts/governance/IGovernor.sol";
 
+/**
+@title DAO Manager
+@author Noah Litvin
+@notice The intention of this contract is to allow an inheriting contract 
+to permit a Governor (that adheres to OpenZeppelin's 4.x Governance API) to
+interact with functions specified in the inheriting contract as succinctly
+as possible. In other words, it should be possible to propose, retrieve the
+proposal id, vote on proposals, and execute proposals that interact with
+whitelisted functions in a contract which inherits this one.
+
+Many limitations exist in the current implementation and, due to restrictions
+in Solidity, it is unclear if this will ever be viable for production use
+(at least without modifications to the underlying Governance API).
+
+Current limitations include:
+- Function calls that intent to transfer funds.
+- Function calls with an arbitrary number of paramters.
+- Function calls with arbitrary types.
+- Multiple function calls in a single vote.
+
+Further, the current implementation does not take the description field (as
+specified in the OpenZeppelin Governance API), nor gas efficiency, into
+account.
+**/
 abstract contract DaoManager {
 
     /* ========== ABSTRACT FUNCTIONS ========== */
