@@ -12,15 +12,15 @@ to permit a Governor (that adheres to OpenZeppelin's 4.x Governance API) to
 interact with functions specified in the inheriting contract as succinctly
 as possible. In other words, it should be possible to propose, retrieve the
 proposal id, vote on proposals, and execute proposals that interact with
-whitelisted functions in a contract which inherits this one.
+whitelisted functions in a contract that inherit this one.
 
 Many limitations exist in the current implementation and, due to restrictions
 in Solidity, it is unclear if this will ever be viable for production use
 (at least without modifications to the underlying Governance API).
 
 Current limitations include:
-- Function calls that intent to transfer funds.
-- Function calls with an arbitrary number of paramters.
+- Function calls that intend to transfer funds.
+- Function calls with an arbitrary number of parameters.
 - Function calls with arbitrary types.
 - Multiple function calls in a single vote.
 
