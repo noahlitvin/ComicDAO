@@ -18,7 +18,7 @@ describe("ComicDAO contract", function () {
 
         this.governor = await this.ComicGovernor.deploy(this.coin.address);
         await this.governor.deployed();
-        await this.dao.setGovernorAddress(this.governor.address);
+        await this.dao.setGovernor(this.governor.address);
     });
 
     it("should issue CMC tokens using the specified formula", async function () {
