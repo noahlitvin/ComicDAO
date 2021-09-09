@@ -11,11 +11,12 @@ interface IERC20Extended is IERC20 {
 
 contract ComicDAO is DaoManager {
 
-    address[] public writers;
-    address[] public artists;
+    mapping(address => bool) public writers;
+    mapping(address => bool) public artists;
     string[] public concepts;
-    uint[] public conceptsAwaitingSketch;
-    uint[] public sketchesAwaitingDrawing;
+    mapping(uint => string) public conceptToSketch;
+    mapping(string => string) public sketchToDrawing;
+    uint completedDrawings;
 
     IERC20Extended private coin;
     IGovernor private governor;
@@ -34,41 +35,67 @@ contract ComicDAO is DaoManager {
     function getGovernor() public view override returns (IGovernor) {
         return governor;
     }
-    
+
+    /* @notice This function allows the governor to add new writer to the DAO. */
+    function addWriter(address _param) external onlyGovernor {
+        writers[_param] = true;
+    }
+
+    /* @notice This function allows the governor to add new writer to the DAO. */
+    function addArtist(address _param) external onlyGovernor {
+        artists[_param] = true;
+    }
 
     /* @notice This function allows the governor to add new writer to the DAO. */
     function addConcept(string memory _newConcept) external onlyGovernor {
         concepts.push(_newConcept);
     }
 
-    /* @notice This function allows the governor to add new writer to the DAO. */
-    function addWriter(address _param) external onlyGovernor {
-        writers.push(_param);
-    }
-
-    /* @notice This function allows the governor to add new writer to the DAO. */
-    function addArtist(address _param) external onlyGovernor {
-        artists.push(_param);
-    }
-
-    function setCoinAddress(address _coinAddress) external { // TODO: onlyOwner?
-        coin = IERC20Extended(_coinAddress);
-    }
-
-
-    /* @notice This function mints $CMC tokens for contributors */
-    function contribute() external payable {
-        coin.mint(msg.sender, msg.value); // TODO: modify based on spec
-    }
-
     /* @notice This function allows any approved writer to submit a sketch corresponding to an approved concept, receive payment, and prevent someone from resubmitting a sketch corresponding to the same concept */
-    function submitSketch(uint conceptId, string memory _sketchURI) external returns (uint sketchId) {
-        
+    function submitSketch(uint _conceptId, string memory _sketchURI) external {
+        require(writers[msg.sender], "Only approved writers may submit sketches");
+        require(bytes(conceptToSketch[_conceptId]).length > 0, "A sketch has already been submitted for this concept.");
+
+        conceptToSketch[_conceptId] = _sketchURI;
+
+        uint _paymentAmount = address(this).balance / 100; // Writers and artists receive 1% of the pool per submission.
+        (bool sent,) = msg.sender.call{value: _paymentAmount}("");
+        require(sent, "Failed to send Ether");
     }
 
     /* @notice This function allows any approved artist to submit a drawing corresponding to a sketch awaiting a drawing, receive payment, and prevent someone from resubmitting a drawing corresponding to the same sketch */
-    function submitDrawing(uint conceptId, string memory _sketchURI) external returns (uint sketchId) {
-        
+    function submitDrawing(string memory _sketchURI, string memory _drawingURI) external {
+        require(artists[msg.sender], "Only approved artists may submit drawings");
+        require(bytes(sketchToDrawing[_sketchURI]).length > 0, "A drawing has already been submitted for this sketch.");
+
+        sketchToDrawing[_sketchURI] = _drawingURI;
+        completedDrawings++;
+
+        uint _paymentAmount = address(this).balance / 100; // Writers and artists receive 1% of the pool per submission.
+        (bool sent,) = msg.sender.call{value: _paymentAmount}("");
+        require(sent, "Failed to send Ether");
+    }
+
+    /* @notice This function allows the address of CMC coin to be set, only once. */
+    function setCoinAddress(address _coinAddress) external {
+        require(address(coin) == address(0), "The coin address has already been set.");
+        coin = IERC20Extended(_coinAddress);
+    }
+
+    /* @notice This function mints $CMC tokens for contributors */
+    function contribute() external payable {
+        require(msg.value > 0, "You must contribute ether.");
+        uint coinsToMint = msg.value - (sqrt(completedDrawings + 1) / msg.value);  // Amount of coins issues decreases as more drawings are completed to incentivize early participation.
+        coin.mint(msg.sender, coinsToMint);
+    }
+
+    function sqrt(uint x) private pure returns (uint y) {
+        uint z = (x + 1) / 2;
+        y = x;
+        while (z < y) {
+            y = z;
+            z = (x / z + z) / 2;
+        }
     }
 
     // ========== RESTRICTED ==========

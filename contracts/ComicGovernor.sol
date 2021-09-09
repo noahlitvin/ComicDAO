@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/interfaces/IERC20.sol";
 contract ComicGovernor is Governor, GovernorCountingSimple {
 
     IERC20 private _coin;
+    mapping(address => uint) private accountVotes;
     
     constructor(IERC20 _voteCoin)
         Governor("ComicGovernor")
@@ -29,12 +30,26 @@ contract ComicGovernor is Governor, GovernorCountingSimple {
         return 1;
     }
 
+    function _castVote(uint256 proposalId, address account, uint8 support, string memory reason) internal override returns (uint256) {
+        accountVotes[msg.sender]++;
+        return super._castVote(proposalId, account, support, reason);
+    }
+
     function getVotes(address account, uint256 blockNumber)
         public
         view
         override(IGovernor)
         returns (uint256)
     {
-        return _coin.balanceOf(account); // TODO: Update based on spec
+        return _coin.balanceOf(account) + (sqrt(accountVotes[msg.sender] + 1) * 10); //  Increase voting power for more voting participation
+    }
+
+    function sqrt(uint x) private pure returns (uint y) {
+        uint z = (x + 1) / 2;
+        y = x;
+        while (z < y) {
+            y = z;
+            z = (x / z + z) / 2;
+        }
     }
 }

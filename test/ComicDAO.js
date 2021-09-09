@@ -53,7 +53,7 @@ describe("ComicDAO contract", function () {
         await expect(this.dao.executeProposal("addWriter", writerAddress)).to.be.reverted; // We can't submit the writer yet.
 
         const accountVotes = await this.governor.getVotes(s1.address, 0); // Pass in current block number?
-        expect(accountVotes).to.eq(10000);
+        expect(accountVotes).to.eq(10010);
 
         await this.governor.castVote(proposalId, 1);
         await this.governor.connect(s2).castVote(proposalId, 0);
@@ -71,7 +71,7 @@ describe("ComicDAO contract", function () {
 
         await this.dao.executeProposal("addWriter", writerAddress);
 
-        expect((await this.dao.writers(0))).to.eq("0x07Aeeb7E544A070a2553e142828fb30c214a1F86")
+        expect((await this.dao.writers("0x07Aeeb7E544A070a2553e142828fb30c214a1F86"))).to.eq(true)
     });
 
     it("should allow a concept to be proposed, voted on, and approved.", async function () {
@@ -96,7 +96,7 @@ describe("ComicDAO contract", function () {
         await expect(this.dao.executeProposal("addConcept", encodedConceptURI)).to.be.reverted; // We can't submit the writer yet.
 
         const accountVotes = await this.governor.getVotes(s1.address, 0); // Pass in current block number?
-        expect(accountVotes).to.eq(10000);
+        expect(accountVotes).to.eq(10010);
 
         await this.governor.castVote(proposalId, 1);
         await this.governor.connect(s2).castVote(proposalId, 0);
