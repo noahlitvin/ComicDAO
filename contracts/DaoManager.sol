@@ -10,9 +10,11 @@ import "@openzeppelin/contracts/governance/IGovernor.sol";
 @notice The intention of this contract is to allow an inheriting contract 
 to permit a Governor (that adheres to OpenZeppelin's 4.x Governance API) to
 interact with functions specified in the inheriting contract as succinctly
-as possible. In other words, it should be possible to propose, retrieve the
-proposal id, vote on proposals, and execute proposals that interact with
-whitelisted functions in a contract that inherit this one.
+as possible.
+
+In other words, it should be possible to propose, retrieve proposal IDs,
+vote on proposals, and execute proposals that interact with whitelisted
+functions in a contract that inherit this one.
 
 Many limitations exist in the current implementation and, due to restrictions
 in Solidity, it is unclear if this will ever be viable for production use
