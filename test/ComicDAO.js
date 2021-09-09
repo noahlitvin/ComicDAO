@@ -43,14 +43,14 @@ describe("ComicDAO contract", function () {
         expect(coinCount).to.eq(10000); // Voting tokens issued
 
         const writerAddress = "0x07Aeeb7E544A070a2553e142828fb30c214a1F86";
-        await this.dao.createProposal(0, writerAddress);//, { value: ethers.utils.parseEther("0.05") });
-        const proposalId = await this.dao.getProposalId(0, writerAddress);
+        await this.dao.createProposal("addWriter", writerAddress);//, { value: ethers.utils.parseEther("0.05") });
+        const proposalId = await this.dao.getProposalId("addWriter", writerAddress);
 
         await ethers.provider.send('evm_mine');
         const proposalState1 = await this.governor.state(proposalId);
 
         expect(proposalState1).to.eq(1); // Voting is "Active"
-        await expect(this.dao.executeProposal(0, writerAddress)).to.be.reverted; // We can't submit the writer yet.
+        await expect(this.dao.executeProposal("addWriter", writerAddress)).to.be.reverted; // We can't submit the writer yet.
 
         const accountVotes = await this.governor.getVotes(s1.address, 0); // Pass in current block number?
         expect(accountVotes).to.eq(10000);
@@ -69,7 +69,7 @@ describe("ComicDAO contract", function () {
         const proposalState2 = await this.governor.state(proposalId);
         expect(proposalState2).to.eq(4); // Proposal has "Succeeded"
 
-        await this.dao.executeProposal(0, writerAddress);
+        await this.dao.executeProposal("addWriter", writerAddress);
 
         expect((await this.dao.writers(0))).to.eq("0x07Aeeb7E544A070a2553e142828fb30c214a1F86")
     });
@@ -85,15 +85,15 @@ describe("ComicDAO contract", function () {
 
         const conceptUri = "ipfs_uri";
         const encodedConceptURI = ethers.utils.formatBytes32String(conceptUri);
-        await this.dao.createProposal(2, encodedConceptURI);//, { value: ethers.utils.parseEther("0.05") });
+        await this.dao.createProposal("addConcept", encodedConceptURI);//, { value: ethers.utils.parseEther("0.05") });
 
-        const proposalId = await this.dao.getProposalId(2, encodedConceptURI);
+        const proposalId = await this.dao.getProposalId("addConcept", encodedConceptURI);
 
         await ethers.provider.send('evm_mine');
         const proposalState1 = await this.governor.state(proposalId);
 
         expect(proposalState1).to.eq(1); // Voting is "Active"
-        await expect(this.dao.executeProposal(2, encodedConceptURI)).to.be.reverted; // We can't submit the writer yet.
+        await expect(this.dao.executeProposal("addConcept", encodedConceptURI)).to.be.reverted; // We can't submit the writer yet.
 
         const accountVotes = await this.governor.getVotes(s1.address, 0); // Pass in current block number?
         expect(accountVotes).to.eq(10000);
@@ -112,7 +112,7 @@ describe("ComicDAO contract", function () {
         const proposalState2 = await this.governor.state(proposalId);
         expect(proposalState2).to.eq(4); // Proposal has "Succeeded"
 
-        await this.dao.executeProposal(2, encodedConceptURI);
+        await this.dao.executeProposal("addConcept", encodedConceptURI);
 
         expect((await this.dao.concepts(0)).toString('utf8').replace(/\0/g, '')).to.eq(conceptUri)
 

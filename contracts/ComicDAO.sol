@@ -20,17 +20,12 @@ contract ComicDAO is DaoManager {
     IERC20Extended private coin;
     IGovernor private governor;
 
-    enum ProposalType {
-        AddWriter,
-        AddArtist,
-        AddConcept
-    }
-
-    // DAO Manager overrides
-    function getProposalSignature(uint _proposalType) pure internal override returns (string memory) {
-        if(ProposalType(_proposalType) == ProposalType.AddWriter) { return "addWriter(bytes)"; }
-        if(ProposalType(_proposalType) == ProposalType.AddArtist) { return "addArtist(bytes)"; }
-        if(ProposalType(_proposalType) == ProposalType.AddConcept) { return "addConcept(bytes)"; }
+    // DAO Manager Overrides
+    
+    function getProposableParamType(string memory _proposalFunctionName) pure internal override returns (string memory) {
+        if(keccak256(abi.encodePacked(_proposalFunctionName)) == keccak256("addWriter")) { return "address"; }
+        if(keccak256(abi.encodePacked(_proposalFunctionName)) == keccak256("addArtist")) { return "address"; }
+        if(keccak256(abi.encodePacked(_proposalFunctionName)) == keccak256("addConcept")) { return "string"; }
     }
 
     function setGovernor(address _governorAddress) external override { //TODO: onlyOwner?
@@ -43,22 +38,17 @@ contract ComicDAO is DaoManager {
 
     /* @notice This function allows the governor to add new writer to the DAO. */
     function addConcept(string memory _newConcept) external onlyGovernor {
-        concepts.push(_newConcept));
+        concepts.push(_newConcept);
     }
 
     /* @notice This function allows the governor to add new writer to the DAO. */
-    function addConcept(bytes calldata _param) external onlyGovernor {
-        concepts.push(string(abi.encodePacked(_param)));
+    function addWriter(address _param) external onlyGovernor {
+        writers.push(_param);
     }
 
     /* @notice This function allows the governor to add new writer to the DAO. */
-    function addWriter(bytes calldata _param) external onlyGovernor {
-        writers.push(bytesToAddress(_param));
-    }
-
-    /* @notice This function allows the governor to add new writer to the DAO. */
-    function addArtist(bytes calldata _param) external onlyGovernor {
-        artists.push(bytesToAddress(_param));
+    function addArtist(address _param) external onlyGovernor {
+        artists.push(_param);
     }
 
     function setCoinAddress(address _coinAddress) external { // TODO: onlyOwner?
@@ -79,12 +69,6 @@ contract ComicDAO is DaoManager {
     /* @notice This function allows any approved artist to submit a drawing corresponding to a sketch awaiting a drawing, receive payment, and prevent someone from resubmitting a drawing corresponding to the same sketch */
     function submitDrawing(uint conceptId, string memory _sketchURI) external returns (uint sketchId) {
         
-    }
-
-    function bytesToAddress(bytes memory _bys) private pure returns (address addr) {
-        assembly {
-            addr := mload(add(_bys,20))
-        } 
     }
 
     // ========== RESTRICTED ==========
